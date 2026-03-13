@@ -1,0 +1,50 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install lambda and test dependencies
+        run: npm run install:all
+
+      - name: Start LocalStack via Docker Compose
+        run: npm start
+
+      - name: Wait for LocalStack to become healthy
+        run: |
+          for i in {1..30}; do
+            if curl -sSf http://localhost:4566/_localstack/health >/dev/null; then
+              echo "LocalStack is healthy."
+              exit 0
+            fi
+            echo "Waiting for LocalStack to be healthy..."
+            sleep 5
+          done
+          echo "LocalStack did not become healthy in time."
+          exit 1
+
+      - name: Run integration tests
+        run: npm test
+
+      - name: Stop LocalStack
+        if: always()
+        run: npm stop
+

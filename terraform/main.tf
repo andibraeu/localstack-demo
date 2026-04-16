@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "aws" {
-  region                      = var.region
+  region                      = "eu-central-1"
   access_key                  = "test"
   secret_key                  = "test"
   skip_credentials_validation = true
@@ -19,7 +19,7 @@ provider "aws" {
     apigateway = "http://localhost:4566"
     iam        = "http://localhost:4566"
     lambda     = "http://localhost:4566"
-    s3         = "http://s3.localhost.localstack.cloud:4566"
+    s3         = "http://localhost:4566"
   }
 }
 
@@ -95,7 +95,7 @@ resource "aws_lambda_function" "notes_handler" {
   function_name = var.lambda_function_name
   role          = aws_iam_role.lambda_role.arn
   handler       = "handler.handler"
-  runtime       = "nodejs18.x"
+  runtime       = "python3.11"
   timeout       = 30
 
   filename         = "${path.module}/../lambda/function.zip"

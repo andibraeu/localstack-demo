@@ -36,8 +36,7 @@ echo ""
 # ------------------------------------------
 echo "[1/6] Building Lambda function..."
 cd "$PROJECT_DIR/lambda"
-npm install --silent
-npm run package
+npm run package >/dev/null
 LAMBDA_ZIP="$PROJECT_DIR/lambda/function.zip"
 echo "  -> function.zip created ($( du -h "$LAMBDA_ZIP" | cut -f1 ) bytes)"
 echo ""
@@ -83,7 +82,7 @@ aws lambda delete-function --function-name "$FUNCTION_NAME" 2>/dev/null || true
 
 aws lambda create-function \
   --function-name "$FUNCTION_NAME" \
-  --runtime nodejs18.x \
+  --runtime python3.11 \
   --handler handler.handler \
   --role "$ROLE_ARN" \
   --zip-file "fileb://$LAMBDA_ZIP" \

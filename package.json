@@ -6,14 +6,11 @@
   "scripts": {
     "start": "docker compose up -d",
     "stop": "docker compose down",
-    "build:lambda": "cd lambda && npm install && npm run package",
+    "build:lambda": "cd lambda && npm run package",
     "deploy": "./scripts/setup.sh",
     "deploy:terraform": "./scripts/deploy-terraform.sh",
-    "test": "cd tests && npx jest --config jest.config.js",
-    "install:all": "npm install && cd lambda && npm install && cd ../tests && npm install",
-    "clean": "docker compose down -v && rm -rf lambda/dist lambda/function.zip lambda/node_modules tests/node_modules volume terraform/.terraform terraform/*.tfstate*"
-  },
-  "devDependencies": {
-    "typescript": "^5.5.0"
+    "test": "python3 -m venv .venv-tests && ./.venv-tests/bin/python -m pip install -q -r lambda/requirements.txt && ./.venv-tests/bin/python -m unittest discover -s tests/integration -p \"test_notes_handler.py\"",
+    "install:all": "npm install",
+    "clean": "docker compose down -v && rm -rf .venv-tests lambda/build lambda/function.zip lambda/node_modules volume terraform/.terraform terraform/*.tfstate*"
   }
 }

@@ -15,8 +15,7 @@ echo ""
 # Build Lambda
 echo "[1/3] Building Lambda function..."
 cd "$PROJECT_DIR/lambda"
-npm install --silent
-npm run package
+npm run package >/dev/null
 echo ""
 
 # Run Terraform

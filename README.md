@@ -14,13 +14,14 @@ Browser ──► API Gateway ──► Lambda ──► S3 (Daten-Bucket)
 | -------------- | ------------------------------------------------ |
 | S3 Website     | Hosts the static HTML/JS page                    |
 | API Gateway    | HTTP REST API with GET and POST on `/notes`      |
-| Lambda         | TypeScript handler: create and read notes        |
+| Lambda         | Python handler: create and read notes            |
 | S3 Data        | Stores notes as JSON files                       |
 
 ## Prerequisites
 
 - **Docker** and **Docker Compose**
-- **Node.js >= 18**
+- **Node.js >= 18** (for npm helper scripts)
+- **Python 3 + pip** (for packaging Python Lambda dependencies)
 - **LocalStack Pro Auth Token** (stored in `.env`)
 - **AWS CLI v2** (supports `AWS_ENDPOINT_URL`) – for path 1
 - **Terraform** + **tflocal** (`pip install terraform-local`) – for path 2
@@ -83,13 +84,12 @@ aws s3 cp s3://notes-data/<note-id>.json - | jq
 
 ## Integration tests
 
-The tests import the handler function **directly** and invoke it.
-The S3 calls inside the handler go against LocalStack –
-no Lambda deployment required. This illustrates the core value of LocalStack:
-existing production code works locally without changes.
+The Python integration test imports `lambda/handler.py` and invokes `handler(...)`
+**directly**. The S3 calls inside the handler still go against Ministack, so you
+test real infrastructure access without invoking the Lambda service itself.
 
 ```bash
-# Prerequisite: LocalStack is running
+# Prerequisite: ministack is running
 npm test
 ```
 
@@ -107,10 +107,9 @@ npm test
 ```
 localstack-demo/
 ├── docker-compose.yml         # LocalStack Pro container
-├── lambda/                    # Lambda function (TypeScript)
-│   ├── src/handler.ts         #   GET/POST /notes handler
-│   ├── package.json
-│   └── tsconfig.json
+├── lambda/                    # Lambda function (Python)
+│   ├── handler.py             #   GET/POST /notes handler
+│   └── package.json           #   Packaging helper
 ├── frontend/                  # Static website
 │   └── index.html
 ├── terraform/                 # IaC with Terraform
@@ -118,9 +117,8 @@ localstack-demo/
 │   ├── variables.tf
 │   └── outputs.tf
 ├── tests/                     # Integration tests
-│   ├── jest.config.ts         # Jest configuration
 │   └── integration/
-│       └── notes.test.ts      # Integration tests for notes API
+│       └── test_notes_handler.py
 ├── scripts/
 │   ├── setup.sh               # Deployment via AWS CLI
 │   └── deploy-terraform.sh    # Deployment via tflocal
@@ -137,8 +135,8 @@ localstack-demo/
 | `npm run build:lambda`  | Build Lambda function and package as ZIP     |
 | `npm run deploy`        | Deployment with AWS CLI (shell script)       |
 | `npm run deploy:terraform` | Deployment with Terraform/tflocal        |
-| `npm test`              | Run integration tests                        |
-| `npm run install:all`   | Install dependencies in all packages         |
+| `npm test`              | Run Python integration test (direct handler call) |
+| `npm run install:all`   | Install root dependencies                    |
 | `npm run clean`         | Clean everything (containers, build artifacts) |
 
 ## Suggested talk flow (approx. 90 minutes)
@@ -148,7 +146,7 @@ localstack-demo/
 3. **Deployment with AWS CLI** (15 min) – Create services step by step
 4. **Test the app in the browser** (10 min) – Create notes, inspect S3
 5. **Terraform variant** (15 min) – Deploy the same infra declaratively
-6. **Integration tests** (15 min) – Run Jest tests live
+6. **Integration tests** (15 min) – Run Python tests live
 7. **Discussion / Q&A** (10–20 min)
 
 ## Useful commands

@@ -1,5 +1,6 @@
 node_modules/
 dist/
+build/
 volume/
 .env
 *.zip
@@ -7,3 +8,4 @@ volume/
 *.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
+__pycache__/

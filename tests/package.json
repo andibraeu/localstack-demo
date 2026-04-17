@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test": "jest --config jest.config.js"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.js"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.600.0",

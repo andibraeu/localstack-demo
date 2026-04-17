@@ -14,12 +14,20 @@
 process.env.AWS_ENDPOINT_URL = process.env.LOCALSTACK_ENDPOINT || "http://localhost:4566";
 process.env.BUCKET_NAME = "test-notes-data";
 process.env.AWS_REGION = "eu-central-1";
+process.env.AWS_DEFAULT_REGION = "eu-central-1";
+process.env.AWS_ACCESS_KEY_ID = "test";
+process.env.AWS_SECRET_ACCESS_KEY = "test";
+process.env.AWS_SESSION_TOKEN = "test";
+process.env.AWS_EC2_METADATA_DISABLED = "true";
+process.env.AWS_SDK_LOAD_CONFIG = "0";
 
 import { handler } from "../../lambda/src/handler";
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import {
   S3Client,
   CreateBucketCommand,
+  type CreateBucketCommandInput,
+  type BucketLocationConstraint,
   ListObjectsV2Command,
   DeleteObjectsCommand,
   DeleteBucketCommand,
@@ -34,6 +42,14 @@ const s3 = new S3Client({
   credentials: { accessKeyId: "test", secretAccessKey: "test" },
   forcePathStyle: true,
 });
+
+const REGION = process.env.AWS_REGION || "eu-central-1";
+
+function getErrorCode(err: unknown): string | undefined {
+  if (!err || typeof err !== "object") return undefined;
+  const maybeError = err as { Code?: string; code?: string; name?: string };
+  return maybeError.Code || maybeError.code || maybeError.name;
+}
 
 function makeEvent(method: string, body?: object): APIGatewayProxyEvent {
   return {
@@ -54,10 +70,20 @@ function makeEvent(method: string, body?: object): APIGatewayProxyEvent {
 
 describe("Notes handler – integration tests against LocalStack", () => {
   beforeAll(async () => {
+    const createBucketInput: CreateBucketCommandInput = { Bucket: BUCKET_NAME };
+    if (REGION !== "us-east-1") {
+      createBucketInput.CreateBucketConfiguration = {
+        LocationConstraint: REGION as BucketLocationConstraint,
+      };
+    }
+
     try {
-      await s3.send(new CreateBucketCommand({ Bucket: BUCKET_NAME }));
-    } catch {
-      // Bucket already exists
+      await s3.send(new CreateBucketCommand(createBucketInput));
+    } catch (err) {
+      const code = getErrorCode(err);
+      if (code !== "BucketAlreadyOwnedByYou" && code !== "BucketAlreadyExists") {
+        throw err;
+      }
     }
   });
 

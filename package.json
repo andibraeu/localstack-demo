@@ -9,7 +9,7 @@
     "build:lambda": "cd lambda && npm install && npm run package",
     "deploy": "./scripts/setup.sh",
     "deploy:terraform": "./scripts/deploy-terraform.sh",
-    "test": "cd tests && npx jest --config jest.config.js",
+    "test": "cd tests && npm test",
     "install:all": "npm install && cd lambda && npm install && cd ../tests && npm install",
     "clean": "docker compose down -v && rm -rf lambda/dist lambda/function.zip lambda/node_modules tests/node_modules volume terraform/.terraform terraform/*.tfstate*"
   },

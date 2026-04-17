@@ -2,9 +2,9 @@ name: Integration Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, ministack ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, ministack ]
 
 jobs:
   test:

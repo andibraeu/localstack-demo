@@ -95,7 +95,7 @@ resource "aws_lambda_function" "notes_handler" {
   function_name = var.lambda_function_name
   role          = aws_iam_role.lambda_role.arn
   handler       = "handler.handler"
-  runtime       = "nodejs18.x"
+  runtime       = "nodejs22.x"
   timeout       = 30
 
   filename         = "${path.module}/../lambda/function.zip"

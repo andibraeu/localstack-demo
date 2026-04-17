@@ -1,8 +1,6 @@
-version: "3.8"
-
 services:
   localstack:
-    image: nahuelnucera/ministack
+    image: ministackorg/ministack:latest
     container_name: ministack-demo
     ports:
       - "4566:4566"

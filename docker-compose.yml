@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   localstack:
-    image: localstack/localstack:2026.3
+    image: localstack/localstack:2026.08
     container_name: localstack-demo
     ports:
       - "4566:4566"
